@@ -6,7 +6,8 @@ public class FlightController : MonoBehaviour
     [SerializeField] private float pitchSpeed = 30f;
     [SerializeField] private float yawSpeed = 30f;
     [SerializeField] private float rollSpeed = 30f;
-    [SerializeField] private float thrust = 5f;
+    [SerializeField] private float moveSpeed = 20f;
+    [SerializeField] private float verticalSpeed = 10f;
 
     private void Update()
     {
@@ -40,8 +41,12 @@ public class FlightController : MonoBehaviour
         transform.Rotate(Vector3.forward * roll * rollSpeed * Time.deltaTime, Space.Self);
 
         if (Keyboard.current.spaceKey.isPressed)
-        {
-            transform.Translate(Vector3.forward * thrust * Time.deltaTime, Space.Self);
-        }
+            transform.position += transform.right * moveSpeed * Time.deltaTime;
+
+        if (Keyboard.current.leftShiftKey.isPressed)
+            transform.Translate(Vector3.up * verticalSpeed * Time.deltaTime, Space.World);
+
+        if (Keyboard.current.leftCtrlKey.isPressed)
+            transform.Translate(Vector3.down * verticalSpeed * Time.deltaTime, Space.World);
     }
 }
