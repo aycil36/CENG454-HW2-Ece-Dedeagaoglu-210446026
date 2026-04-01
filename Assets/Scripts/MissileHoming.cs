@@ -2,15 +2,29 @@ using UnityEngine;
 
 public class MissileHoming : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private float moveSpeed = 18f;
+    [SerializeField] private float turnSpeed = 4f;
+
+    private Transform target;
+
+    public void SetTarget(Transform newTarget)
     {
-        
+        target = newTarget;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        if (target == null) return;
+
+        Vector3 direction = (target.position - transform.position).normalized;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            turnSpeed * Time.deltaTime
+        );
+
+        transform.position += transform.forward * moveSpeed * Time.deltaTime;
     }
 }

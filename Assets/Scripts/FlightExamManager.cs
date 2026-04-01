@@ -5,55 +5,40 @@ public class FlightExamManager : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI warningText;
+    [SerializeField] private TextMeshProUGUI missionText;
 
-    [Header("State")]
+    [Header("Mission State")]
+    public bool hasTakenOff { get; private set; }
     public bool hasEnteredDangerZone { get; private set; }
     public bool isInsideDangerZone { get; private set; }
     public bool countdownActive { get; private set; }
     public bool missileActive { get; private set; }
     public bool threatCleared { get; private set; }
-
-    private float dangerZoneTimer = 0f;
-    private float missileSpawnDelay = 5f;
+    public bool missionComplete { get; private set; }
 
     private void Awake()
     {
         HideWarning();
+        HideMissionText();
     }
 
-    private void Update()
+    public void RegisterTakeoff()
     {
-        if (isInsideDangerZone && !missileActive)
-        {
-            dangerZoneTimer += Time.deltaTime;
-
-            if (dangerZoneTimer >= missileSpawnDelay)
-            {
-                countdownActive = false;
-                missileActive = true;
-                ShowWarning("MISSILE INBOUND!");
-            }
-        }
+        hasTakenOff = true;
     }
 
     public void EnterDangerZone()
     {
         isInsideDangerZone = true;
         hasEnteredDangerZone = true;
-
-        if (!missileActive)
-        {
-            countdownActive = true;
-            dangerZoneTimer = 0f;
-            ShowWarning("Entered a Dangerous Zone!");
-        }
+        countdownActive = true;
+        ShowWarning("Entered a Dangerous Zone!");
     }
 
     public void ExitDangerZone()
     {
         isInsideDangerZone = false;
         countdownActive = false;
-        dangerZoneTimer = 0f;
 
         if (missileActive)
         {
@@ -69,10 +54,32 @@ public class FlightExamManager : MonoBehaviour
         }
     }
 
+    public void MissileLaunched()
+    {
+        missileActive = true;
+        countdownActive = false;
+        ShowWarning("MISSILE INBOUND!");
+    }
+
+    public void MissileDestroyed()
+    {
+        missileActive = false;
+        threatCleared = true;
+        ShowWarning("Threat Cleared!");
+        CancelInvoke();
+        Invoke(nameof(HideWarning), 2f);
+    }
+
+    public void CompleteMission()
+    {
+        if (missionComplete) return;
+        missionComplete = true;
+        ShowMissionText("Mission Complete!");
+    }
+
     public void ShowWarning(string message)
     {
         if (warningText == null) return;
-
         warningText.gameObject.SetActive(true);
         warningText.text = message;
     }
@@ -80,8 +87,21 @@ public class FlightExamManager : MonoBehaviour
     public void HideWarning()
     {
         if (warningText == null) return;
-
         warningText.text = "";
         warningText.gameObject.SetActive(false);
+    }
+
+    public void ShowMissionText(string message)
+    {
+        if (missionText == null) return;
+        missionText.gameObject.SetActive(true);
+        missionText.text = message;
+    }
+
+    public void HideMissionText()
+    {
+        if (missionText == null) return;
+        missionText.text = "";
+        missionText.gameObject.SetActive(false);
     }
 }
