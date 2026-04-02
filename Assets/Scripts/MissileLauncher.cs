@@ -12,6 +12,11 @@ public class MissileLauncher : MonoBehaviour
         if (missilePrefab == null || launchPoint == null || target == null)
             return;
 
+        if (activeMissile != null)
+        {
+            Destroy(activeMissile);
+        }
+
         activeMissile = Instantiate(missilePrefab, launchPoint.position, launchPoint.rotation);
 
         MissileHoming homing = activeMissile.GetComponent<MissileHoming>();
@@ -26,6 +31,7 @@ public class MissileLauncher : MonoBehaviour
         if (activeMissile != null)
         {
             Destroy(activeMissile);
+            activeMissile = null;
         }
     }
 }
