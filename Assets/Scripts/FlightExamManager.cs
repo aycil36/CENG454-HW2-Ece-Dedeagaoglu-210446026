@@ -27,6 +27,7 @@ public class FlightExamManager : MonoBehaviour
     {
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+    //    hasTakenOff = true;
         HideWarning();
         HideMissionText();
     }
@@ -39,34 +40,34 @@ public class FlightExamManager : MonoBehaviour
     public void EnterDangerZone()
     {
         if (isInsideDangerZone) return;
+
         isInsideDangerZone = true;
         hasEnteredDangerZone = true;
         countdownActive = true;
+
         ShowWarning("Entered a Dangerous Zone!");
         PlayClip(dangerZoneClip);
     }
 
-    public void ExitDangerZone()
-    {
-        if (!isInsideDangerZone) return;
-        isInsideDangerZone = false;
-        countdownActive = false;
+  public void ExitDangerZone()
+  {
+    if (!isInsideDangerZone) return;
 
-        if (missileActive)
-        {
-            missileActive = false;
-            threatCleared = true;
-            ShowWarning("Threat Cleared!");
-            CancelInvoke();
-            Invoke(nameof(HideWarning), 2f);
-            PlayClip(escapeClip);
-        }
-        else
-        {
-            HideWarning();
-            PlayClip(escapeClip);
-        }
+    isInsideDangerZone = false;
+    countdownActive = false;
+
+    threatCleared = true;
+
+    if (missileActive)
+    {
+        missileActive = false;
     }
+
+    ShowWarning("Threat Cleared!");
+    CancelInvoke();
+    Invoke(nameof(HideWarning), 2f);
+    PlayClip(escapeClip);
+   }
 
     public void MissileLaunched()
     {
@@ -84,15 +85,15 @@ public class FlightExamManager : MonoBehaviour
         Invoke(nameof(HideWarning), 2f);
     }
 
-public void OnMissileHit()
-{
-    missileActive = false;
-    threatCleared = false;
-    PlayClip(hitClip);
-    ShowWarning("MISSILE HIT! Restarting...");
-    CancelInvoke();
-    Invoke(nameof(RestartScene), 2f);
-}
+    public void OnMissileHit()
+    {
+        missileActive = false;
+        threatCleared = false;
+        PlayClip(hitClip);
+        ShowWarning("MISSILE HIT! Restarting...");
+        CancelInvoke();
+        Invoke(nameof(RestartScene), 2f);
+    }
 
     private void RestartScene()
     {
@@ -103,7 +104,14 @@ public void OnMissileHit()
     public void CompleteMission()
     {
         if (missionComplete) return;
+
         missionComplete = true;
+
+        if (missionText != null)
+        {
+            missionText.color = Color.red;
+        }
+
         ShowMissionText("Mission Complete!");
         PlayClip(escapeClip);
     }
@@ -117,6 +125,7 @@ public void OnMissileHit()
     public void ShowWarning(string message)
     {
         if (warningText == null) return;
+
         warningText.gameObject.SetActive(true);
         warningText.text = message;
     }
@@ -124,6 +133,7 @@ public void OnMissileHit()
     public void HideWarning()
     {
         if (warningText == null) return;
+
         warningText.text = "";
         warningText.gameObject.SetActive(false);
     }
@@ -131,6 +141,7 @@ public void OnMissileHit()
     public void ShowMissionText(string message)
     {
         if (missionText == null) return;
+
         missionText.gameObject.SetActive(true);
         missionText.text = message;
     }
@@ -138,9 +149,60 @@ public void OnMissileHit()
     public void HideMissionText()
     {
         if (missionText == null) return;
+
         missionText.text = "";
         missionText.gameObject.SetActive(false);
     }
 
-    
+    public void TryCompleteMission()
+    {
+    Debug.Log("=== TryCompleteMission CALLED ===");
+    Debug.Log("hasTakenOff = " + hasTakenOff);
+    Debug.Log("hasEnteredDangerZone = " + hasEnteredDangerZone);
+    Debug.Log("threatCleared = " + threatCleared);
+    Debug.Log("missionComplete = " + missionComplete);
+    Debug.Log("missionText is null? " + (missionText == null));
+
+    if (!hasTakenOff)
+    {
+        Debug.LogError("Mission not valid: Takeoff not completed.");
+        return;
+    }
+
+    if (!hasEnteredDangerZone)
+    {
+        Debug.LogError("Mission not valid: Danger zone not entered.");
+        return;
+    }
+
+    if (!threatCleared)
+    {
+        Debug.LogError("Mission not valid: Threat not cleared.");
+        return;
+    }
+
+    if (missionComplete)
+    {
+        Debug.LogWarning("Mission already completed.");
+        return;
+    }
+
+    missionComplete = true;
+
+    if (missionText != null)
+    {
+        missionText.gameObject.SetActive(true);
+        missionText.text = "Mission Complete!";
+        Debug.Log("Mission text directly assigned.");
+    }
+    else
+    {
+        Debug.LogError("missionText is NULL!");
+    }
+
+    HideWarning();
+    PlayClip(escapeClip);
+
+    Debug.Log("=== MISSION COMPLETE ===");
+    }
 }
