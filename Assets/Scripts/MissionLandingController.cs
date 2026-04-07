@@ -3,7 +3,7 @@ using UnityEngine;
 public class MissionLandingController : MonoBehaviour
 {
     [SerializeField] private FlightExamManager examManager;
-    [SerializeField] private float takeoffHeightThreshold = 3f;
+    [SerializeField] private float takeoffHeightThreshold = 5f;
 
     private bool takeoffRegistered = false;
 
@@ -11,7 +11,6 @@ public class MissionLandingController : MonoBehaviour
     {
         if (examManager == null) return;
 
-        // Takeoff algılama
         if (!takeoffRegistered && transform.position.y >= takeoffHeightThreshold)
         {
             takeoffRegistered = true;
@@ -23,15 +22,21 @@ public class MissionLandingController : MonoBehaviour
     {
         if (examManager == null) return;
 
-        // Landing area'ya giriş
         if (!other.CompareTag("LandingArea")) return;
 
-        // Mission complete şartları
         if (examManager.hasTakenOff &&
             examManager.threatCleared &&
             !examManager.missionComplete)
         {
             examManager.CompleteMission();
+        }
+        else if (!examManager.hasTakenOff)
+        {
+            examManager.ShowWarning("You must take off first!");
+        }
+        else if (!examManager.threatCleared)
+        {
+            examManager.ShowWarning("Clear the threat before landing!");
         }
     }
 }
